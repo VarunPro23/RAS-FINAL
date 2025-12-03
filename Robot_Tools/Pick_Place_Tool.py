@@ -14,6 +14,7 @@ from config import (
 from Robot_Tools.Robot_Motion_Tools import (
     move_robot_point_above,
     move_robot_point_block,
+    move_to_home,
     suction_on,
     suction_off,
     apply_affine,            # apply_affine(M, u, v) -> (X, Y)
@@ -81,14 +82,14 @@ def pick_and_place_block(
         # HEIGHT CALCULATION
         # -----------------------------------------
         # Pick from top of block sitting on the table
-        pickup_height = z_table + block_height_mm
+        pickup_height = z_table
 
         if placement_type == "on_top":
             # Place on top of target block (2-block stack)
-            place_height = z_table + 2 * block_height_mm + stack_delta_mm
+            place_height = z_table + block_height_mm + stack_delta_mm
         elif placement_type == "beside":
             # Place on table beside target block; Z to release at block top
-            place_height = z_table + block_height_mm
+            place_height = z_table 
         else:
             return {
                 "error": f"Unknown placement_type '{placement_type}'. Use 'on_top' or 'beside'."
@@ -121,11 +122,13 @@ def pick_and_place_block(
 
             steps.append({"step": "descend_to_place_on_top", "z": place_height})
             steps.append(move_robot_point_block(tgt_u, tgt_v, place_height))
-
+            
             place_info = {
                 "mode": "on_top",
                 "target_pixel": {"u": tgt_u, "v": tgt_v},
             }
+            # steps.append(move_to_home())
+
 
         else:  # placement_type == "beside"
             # Convert target pixel -> robot (X, Y)
@@ -205,9 +208,13 @@ def pick_and_place_block(
         steps.append(suction_off())
 
         steps.append({"step": "lift_after_place", "z": z_above})
+        # steps.append(move_to_home())
+
         # For 'on_top', we move above target pixel; for 'beside', above the side location.
         if placement_type == "on_top":
             steps.append(move_robot_point_above(tgt_u, tgt_v, z_above))
+            steps.append(move_to_home())
+
         else:
             steps.append(
                 move_to_specific_position(
@@ -217,6 +224,8 @@ def pick_and_place_block(
                     r=0.0,
                 )
             )
+            steps.append(move_to_home())
+
 
         return {
             "message": f"Placed {source_label} using placement_type='{placement_type}'",
