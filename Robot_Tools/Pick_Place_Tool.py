@@ -1,4 +1,5 @@
 import os
+import time
 import json
 from google.genai import types
 from config import (
@@ -100,13 +101,14 @@ def pick_and_place_block(
         # -----------------------------------------
         # PICK SEQUENCE (always the same)
         # -----------------------------------------
-        steps.append({"step": "move_above_source", "u": src_u, "v": src_v})
-        steps.append(move_robot_point_above(src_u, src_v, z_above))
+        steps.append({"step": "move_above_source", "u": src_u+5, "v": src_v+5})
+        steps.append(move_robot_point_above(src_u+5, src_v+5, z_above))
 
         steps.append({"step": "descend_to_pick", "z": pickup_height})
-        steps.append(move_robot_point_block(src_u, src_v, pickup_height))
+        steps.append(move_robot_point_block(src_u+5, src_v+5, pickup_height))
 
         steps.append({"step": "suction_on"})
+        time.sleep(3)
         steps.append(suction_on())
 
         steps.append({"step": "lift_after_pick", "z": z_above})
@@ -205,6 +207,7 @@ def pick_and_place_block(
 
         # Common: release and lift
         steps.append({"step": "suction_off"})
+        time.sleep(1)
         steps.append(suction_off())
 
         steps.append({"step": "lift_after_place", "z": z_above})
