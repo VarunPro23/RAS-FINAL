@@ -7,18 +7,16 @@ from collections import defaultdict
 from google.genai import types
 from config import camera_index, capture_wait_time
 
-# ---------------------------------------------------------
+
 # Helper: draw outlined text
-# ---------------------------------------------------------
 def put_text(img, text, org, scale=0.6, thickness=2):
     cv2.putText(img, text, org, cv2.FONT_HERSHEY_SIMPLEX,
                 scale, (0, 0, 0), thickness + 2, cv2.LINE_AA)
     cv2.putText(img, text, org, cv2.FONT_HERSHEY_SIMPLEX,
                 scale, (255, 255, 255), thickness, cv2.LINE_AA)
 
-# ---------------------------------------------------------
+
 # Helper: detect colored blocks and annotate frame
-# ---------------------------------------------------------
 def detect_and_annotate_blocks(frame, area_threshold=500):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
@@ -72,124 +70,7 @@ def detect_and_annotate_blocks(frame, area_threshold=500):
 
     return detected_blocks
 
-# ---------------------------------------------------------
 # MAIN TOOL FUNCTION
-# ---------------------------------------------------------
-# def capture_scene_with_detection(
-#     cam_index=camera_index,
-#     width: int = 640,
-#     height: int = 480,
-#     save_dir: str = "captures",
-#     capture_interval_sec=capture_wait_time,
-# ):
-#     """
-#     Open the camera, show live view, detect colored blocks, annotate them,
-#     show a countdown from capture_interval_sec to 0, auto-save one annotated
-#     frame + JSON when countdown reaches 0, then keep showing the labeled feed
-#     until the user presses 'q' to quit.
-
-#     Returns a JSON-serializable dict with paths and detected blocks.
-#     """
-#     try:
-#         os.makedirs(save_dir, exist_ok=True)
-
-#         cap = cv2.VideoCapture(cam_index, cv2.CAP_ANY)
-#         if not cap.isOpened():
-#             return {
-#                 "error": f"Could not open camera index {cam_index}"
-#             }
-
-#         cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-#         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
-#         cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
-
-#         window_name = "Camera (q=quit)"
-#         cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-#         cv2.resizeWindow(window_name, width, height)
-
-#         # start time for countdown
-#         start_time = time.time()
-#         has_saved_once = False
-
-#         img_path = None
-#         json_path = None
-#         last_detected_blocks_data = []
-
-#         while True:
-#             ok, frame = cap.read()
-#             if not ok:
-#                 ok, frame = cap.read()
-#                 if not ok:
-#                     print("Frame grab failed.")
-#                     break
-
-#             detected_blocks = detect_and_annotate_blocks(frame)
-
-#             # --- COUNTDOWN / STATUS TEXT ---
-#             if has_saved_once:
-#                 # After capture: no timer, just info text
-#                 put_text(frame, "Capture done — labels only (q=quit)", (10, 60))
-#             else:
-#                 elapsed = time.time() - start_time
-#                 remaining = max(0, int(capture_interval_sec - elapsed))
-#                 put_text(
-#                     frame,
-#                     f"Auto-save in {remaining}s (q=quit)",
-#                     (10, 60),
-#                 )
-
-#             cv2.imshow(window_name, frame)
-#             key = cv2.waitKey(1) & 0xFF
-
-#             if key == ord('q'):
-#                 break
-
-#             # --- AUTO-SAVE ONCE WHEN TIMER EXPIRES ---
-#             if (not has_saved_once) and (time.time() - start_time >= capture_interval_sec):
-#                 has_saved_once = True
-
-#                 img_path = os.path.join(save_dir, "capture_scene.png")
-#                 json_path = os.path.join(save_dir, "capture_scene.json")
-
-#                 cv2.imwrite(img_path, frame)
-#                 print(f"Saved image: {img_path}")
-
-#                 data = [
-#                     {"label": label, "x": cx, "y": cy}
-#                     for label, (cx, cy) in detected_blocks
-#                 ]
-#                 last_detected_blocks_data = data
-
-#                 with open(json_path, "w") as f:
-#                     json.dump(data, f, indent=2)
-
-#                 print(f"Saved JSON: {json_path}")
-
-#         cap.release()
-#         cv2.destroyAllWindows()
-
-#         # Return info to the LLM/tool caller
-#         if img_path is None or json_path is None:
-#             return {
-#                 "message": "Camera closed before auto-save completed.",
-#                 "image_path": img_path,
-#                 "json_path": json_path,
-#                 "detected_blocks": last_detected_blocks_data,
-#             }
-
-#         return {
-#             "message": "Capture completed.",
-#             "image_path": img_path,
-#             "json_path": json_path,
-#             "detected_blocks": last_detected_blocks_data,
-#         }
-
-#     except Exception as e:
-#         # Tool-safe error return
-#         return {
-#             "error": f"Error in capture_scene_with_detection: {e}"
-#         }
-
 def capture_scene_with_detection(
     cam_index=camera_index,
     width: int = 640,
@@ -295,9 +176,7 @@ def capture_scene_with_detection(
         }
 
 
-# ---------------------------------------------------------
 # SCHEMA FOR LLM TOOL CALLING
-# ---------------------------------------------------------
 schema_capture_scene_with_detection = types.FunctionDeclaration(
     name="capture_scene_with_detection",
     description=(

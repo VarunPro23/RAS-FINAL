@@ -7,10 +7,6 @@ block_height = -45
 default_port="/dev/ttyACM0"
 
 #  3x3 affine matrix for pixel -> robot (X,Y)
-# M = np.array([
-#      [6.00650232e-03 ,-4.84214952e-01,  3.80653329e+02],
-#      [-4.69079919e-01  ,3.74996755e-03,  1.55349575e+02]
-# ], dtype=np.float64)
 
 M = np.array([
      [ 3.22215816e-03, -4.71279715e-01,  4.18469351e+02],
