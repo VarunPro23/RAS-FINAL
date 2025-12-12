@@ -1,6 +1,5 @@
 # Robot_Tools/Robot_Motion_Tools.py
 
-# from pydobot.dobot import MODE_PTP
 import pydobot
 import time
 import numpy as np
@@ -9,25 +8,19 @@ import json
 from google.genai import types
 from config import M, default_port
 
-# =========================================================
 # GLOBAL STATE
-# =========================================================
 device = None          # single global Dobot handle
 affine_matrix = M   # optional global 3x3 affine for pixel->robot
 default_port = default_port
 
-# =========================================================
 # HELPER: ensure device is connected
-# =========================================================
 def _ensure_device(port = default_port):
     global device
     if device is None:
         device = pydobot.Dobot(port)
     return device
 
-# =========================================================
 # ROBOT FUNCTION 1: get_dobot_device
-# =========================================================
 def get_dobot_device(port = default_port):
     """
     Connect to the Dobot and store the device globally.
@@ -64,9 +57,8 @@ schema_get_dobot_device = types.FunctionDeclaration(
 
 def device_close():
     device.close()
-# =========================================================
+
 # ROBOT FUNCTION 2: move_to_home
-# =========================================================
 def move_to_home():
     """
     Home the Dobot. If not already connected, connect on default port.
@@ -90,9 +82,7 @@ schema_move_to_home = types.FunctionDeclaration(
     ),
 )
 
-# =========================================================
 # ROBOT FUNCTION 3: move_to_specific_position
-# =========================================================
 def move_to_specific_position(x: float, y: float, z: float, r: float = 0.0):
     """
     Move the robot to a specific Cartesian pose (x, y, z, r).
@@ -137,9 +127,7 @@ schema_move_to_specific_position = types.FunctionDeclaration(
     ),
 )
 
-# =========================================================
 # ROBOT FUNCTION 4: get_current_pose
-# =========================================================
 def get_current_pose():
     """
     Get current Cartesian pose and joint angles from the Dobot.
@@ -167,9 +155,7 @@ schema_get_current_pose = types.FunctionDeclaration(
     ),
 )
 
-# =========================================================
 # ROBOT FUNCTION 5: suction_on / suction_off
-# =========================================================
 def suction_on():
     """
     Turn suction on.
@@ -213,9 +199,7 @@ schema_suction_off = types.FunctionDeclaration(
     ),
 )
 
-# =========================================================
 # AFFINE + PIXEL->ROBOT HELPERS
-# =========================================================
 def apply_affine(M, u, v):
     uv1 = np.array([u, v, 1.0], dtype=np.float64)
     XY = M @ uv1
@@ -253,9 +237,7 @@ schema_set_affine_matrix = types.FunctionDeclaration(
     ),
 )
 
-# =========================================================
 # ROBOT FUNCTION 6: move_robot_point_above
-# =========================================================
 def move_robot_point_above(u: float, v: float, z_above: float = -30.0):
     """
     Move robot to a point ABOVE the block at image pixel (u, v),
@@ -308,9 +290,7 @@ schema_move_robot_point_above = types.FunctionDeclaration(
     ),
 )
 
-# =========================================================
 # ROBOT FUNCTION 7: move_robot_point_block
-# =========================================================
 def move_robot_point_block(u: float, v: float, block_height: float = -30.0):
     """
     Move robot to the BLOCK height at image pixel (u, v),
@@ -324,7 +304,7 @@ def move_robot_point_block(u: float, v: float, block_height: float = -30.0):
 
         Xa, Ya = apply_affine(affine_matrix, u, v)
         print(f"Affine: pixel({u:.3f}, {v:.3f}) -> robot({Xa:.6f}, {Ya:.6f})")
-
+        Xa+=5
         
         dev.move_to(x=Xa, y=Ya, z=block_height, r=0.0)
         time.sleep(1)
@@ -364,9 +344,7 @@ schema_move_robot_point_block = types.FunctionDeclaration(
     ),
 )
 
-# =========================================================
 # FUNCTION 8: update_scene_memory (no device needed)
-# =========================================================
 def update_scene_memory(
     detection_json_path: str,
     scene_memory_path: str = "scene_memory.json",

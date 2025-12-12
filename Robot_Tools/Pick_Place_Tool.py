@@ -22,6 +22,8 @@ from Robot_Tools.Robot_Motion_Tools import (
     move_to_specific_position,
 )
 
+Stack_Heights = {}
+
 def pick_and_place_block(
     detection_json_path: str = "captures/capture_scene.json",
     source_label: str = "blue1",
@@ -85,9 +87,11 @@ def pick_and_place_block(
         # Pick from top of block sitting on the table
         pickup_height = z_table
 
+        current_stack = Stack_Heights.get(target_label, 1)
+
         if placement_type == "on_top":
             # Place on top of target block (2-block stack)
-            place_height = z_table + block_height_mm + stack_delta_mm
+            place_height = z_table + current_stack * block_height_mm + stack_delta_mm
         elif placement_type == "beside":
             # Place on table beside target block; Z to release at block top
             place_height = z_table 
@@ -96,6 +100,10 @@ def pick_and_place_block(
                 "error": f"Unknown placement_type '{placement_type}'. Use 'on_top' or 'beside'."
             }
 
+        if placement_type == "on_top":
+            # Update stack height for target block
+            Stack_Heights[target_label] = current_stack + 1
+            
         steps = []
 
         # -----------------------------------------
@@ -105,7 +113,7 @@ def pick_and_place_block(
         steps.append(move_robot_point_above(src_u+5, src_v+5, z_above))
 
         steps.append({"step": "descend_to_pick", "z": pickup_height})
-        steps.append(move_robot_point_block(src_u+5, src_v+5, pickup_height))
+        steps.append(move_robot_point_block(src_u, src_v, pickup_height))
 
         steps.append({"step": "suction_on"})
         time.sleep(3)

@@ -13,13 +13,13 @@ default_port="/dev/ttyACM0"
 # ], dtype=np.float64)
 
 M = np.array([
-     [ 1.62333905e-02, -4.80357918e-01,  3.89856467e+02],
-     [-4.74191227e-01,  2.22624989e-03,  1.71637605e+02]
+     [ 3.22215816e-03, -4.71279715e-01,  4.18469351e+02],
+     [-4.69432195e-01, -7.51873791e-03,  1.48748933e+02]
 ], dtype=np.float64)
                  
 z_above = 100           # safe travel height (e.g. 100)
 z_table = -46           # Z at table contact
-block_height_mm = 10   # block physical thickness
+block_height_mm = 7   # block physical thickness
 block_length_mm = 20   # block physical length
 stack_delta_mm = 10    # extra height when stacking (to avoid collision)
 side_offset_mm = 10    # extra XY gap when placing beside
